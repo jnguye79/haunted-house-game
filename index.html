@@ -13,20 +13,87 @@
     <canvas id="gameCanvas" width="480" height="360"></canvas>
   </div>
 
-  <button onclick="startGame()">Start Game</button>
+  <button id="startBtn">Start Game</button>
 
   <script>
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
 
-    function startGame() {
-      ctx.fillStyle = "#000";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    let scene = -1; // -1 = not started, 0-2 = cutscenes
+    const dialogues = [
+      "They say no one should enter the house down the street at night...",
+      "But a group of curious kindergarteners dared to sneak inside!",
+      "Suddenly, the house lights flicker on...\nA grand staircase with four doors appears."
+    ];
 
-      ctx.fillStyle = "#ffcc00";
-      ctx.font = "16px 'Press Start 2P'";
-      ctx.fillText("Get ready for fun!", 100, 180);
+    // preload images for each scene
+    const sceneImages = [
+      "scene1.png", // dark street
+      "scene2.png", // kids sneaking in
+      "scene3.png"  // staircase
+    ].map(src => {
+      const img = new Image();
+      img.src = src;
+      return img;
+    });
+
+    function drawScene() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // draw scene background image
+      if (scene >= 0 && scene < sceneImages.length) {
+        ctx.drawImage(sceneImages[scene], 0, 0, canvas.width, canvas.height);
+      }
+
+      // dialogue box
+      ctx.fillStyle = "rgba(0,0,0,0.7)";
+      ctx.fillRect(0, canvas.height - 80, canvas.width, 80);
+
+      ctx.fillStyle = "#fff";
+      ctx.font = "12px 'Press Start 2P'";
+      wrapText(dialogues[scene], 20, canvas.height - 55, canvas.width - 40, 14);
     }
+
+    // helper: wrap long text
+    function wrapText(text, x, y, maxWidth, lineHeight) {
+      const words = text.split(" ");
+      let line = "";
+      for (let n = 0; n < words.length; n++) {
+        const testLine = line + words[n] + " ";
+        const testWidth = ctx.measureText(testLine).width;
+        if (testWidth > maxWidth && n > 0) {
+          ctx.fillText(line, x, y);
+          line = words[n] + " ";
+          y += lineHeight;
+        } else {
+          line = testLine;
+        }
+      }
+      ctx.fillText(line, x, y);
+    }
+
+    function nextScene() {
+      if (scene < dialogues.length - 1) {
+        scene++;
+        drawScene();
+      } else {
+        console.log("Cutscenes finished – ready for gameplay!");
+        // TODO: Replace with main game logic after cutscenes
+      }
+    }
+
+    document.getElementById("startBtn").addEventListener("click", () => {
+      scene = 0;
+      drawScene();
+    });
+
+    // advance scenes with click or space/enter
+    canvas.addEventListener("click", nextScene);
+    window.addEventListener("keydown", (e) => {
+      if (e.code === "Space" || e.code === "Enter") {
+        nextScene();
+      }
+    });
   </script>
 </body>
 </html>
