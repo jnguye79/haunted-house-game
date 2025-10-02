@@ -130,7 +130,13 @@ function nextScene() {
 // controls
 document.getElementById("startBtn").addEventListener("click", () => {
   nextScene();
+
+  // disable & hide start button after first click
+  const btn = document.getElementById("startBtn");
+  btn.disabled = true;
+  btn.style.display = "none";
 });
+
 canvas.addEventListener("click", nextScene);
 window.addEventListener("keydown", (e) => {
   if (e.code === "Space" || e.code === "Enter") nextScene();
